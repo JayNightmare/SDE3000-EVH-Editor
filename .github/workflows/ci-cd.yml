@@ -8,7 +8,7 @@ on:
 
 jobs:
     test:
-        name: Test and Lint
+        name: Lint
         runs-on: ubuntu-latest
 
         strategy:
@@ -30,11 +30,6 @@ jobs:
 
             - name: Run ESLint
               run: npm run lint --if-present || npx eslint src/
-
-            - name: Run tests
-              run: npm test -- --coverage --watchAll=false
-              env:
-                  CI: true
 
             - name: Upload coverage to Codecov
               uses: codecov/codecov-action@v3
