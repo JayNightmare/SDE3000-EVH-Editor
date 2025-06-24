@@ -2,7 +2,7 @@
   "name": "sde3000-evh-editor",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://yourusername.github.io/sde3000-evh-editor",
+  "homepage": "https://jaynightmare.github.io/SDE3000-EVH-Editor",
   "dependencies": {
     "@shadcn/ui": "^0.0.4",
     "@testing-library/dom": "^10.4.0",
