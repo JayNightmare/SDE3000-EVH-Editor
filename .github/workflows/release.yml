@@ -117,10 +117,3 @@ jobs:
                   asset_path: ./SDE3000-EVH-Editor-${{ github.ref_name }}.zip
                   asset_name: SDE3000-EVH-Editor-${{ github.ref_name }}.zip
                   asset_content_type: application/zip
-
-            - name: Deploy to GitHub Pages
-              run: |
-                  echo "Deploying release to GitHub Pages..."
-                  npm run deploy
-              env:
-                  GITHUB_TOKEN: ${{ secrets.TOKEN }}
