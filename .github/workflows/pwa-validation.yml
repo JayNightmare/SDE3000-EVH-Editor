@@ -1,0 +1,91 @@
+name: PWA Validation
+
+on:
+    push:
+        branches: [main, develop]
+    pull_request:
+        branches: [main]
+
+jobs:
+    pwa-validation:
+        name: Validate PWA Requirements
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20.x"
+                  cache: "npm"
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Build application
+              run: npm run build
+
+            - name: Validate manifest.json
+              run: |
+                  echo "Validating PWA manifest..."
+                  if [ ! -f "public/manifest.json" ]; then
+                    echo "❌ manifest.json not found"
+                    exit 1
+                  fi
+
+                  # Check required manifest fields
+                  node -e "
+                    const fs = require('fs');
+                    const manifest = JSON.parse(fs.readFileSync('public/manifest.json', 'utf8'));
+                    const required = ['name', 'short_name', 'start_url', 'display', 'icons'];
+                    const missing = required.filter(field => !manifest[field]);
+                    if (missing.length > 0) {
+                      console.log('❌ Missing required manifest fields:', missing);
+                      process.exit(1);
+                    }
+                    console.log('✅ Manifest validation passed');
+                  "
+
+            - name: Validate Service Worker
+              run: |
+                  echo "Validating Service Worker..."
+                  if [ ! -f "public/sw.js" ]; then
+                    echo "❌ Service Worker not found"
+                    exit 1
+                  fi
+
+                  # Check if service worker has required event listeners
+                  if ! grep -q "addEventListener.*install" public/sw.js; then
+                    echo "❌ Service Worker missing install event listener"
+                    exit 1
+                  fi
+
+                  if ! grep -q "addEventListener.*fetch" public/sw.js; then
+                    echo "❌ Service Worker missing fetch event listener"
+                    exit 1
+                  fi
+
+                  echo "✅ Service Worker validation passed"
+
+            - name: Check PWA Icons
+              run: |
+                  echo "Validating PWA icons..."
+                  required_sizes=("192x192" "512x512")
+
+                  for size in "${required_sizes[@]}"; do
+                    if [ ! -f "public/logo${size%x*}.png" ] && [ ! -f "build/static/media/logo${size%x*}.png" ]; then
+                      echo "❌ Missing icon for size $size"
+                      exit 1
+                    fi
+                  done
+
+                  echo "✅ PWA icons validation passed"
+
+            - name: Test PWA with Lighthouse
+              uses: treosh/lighthouse-ci-action@v10
+              with:
+                  configPath: "./lighthouse-pwa.config.js"
+                  uploadArtifacts: true
+                  temporaryPublicStorage: true

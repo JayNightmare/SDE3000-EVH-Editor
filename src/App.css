@@ -1,10 +1,13 @@
 .App {
-  text-align: center;
+  min-height: 100vh;
+  background: var(--primary-bg);
+  background-attachment: fixed;
 }
 
 .App-logo {
   height: 40vmin;
   pointer-events: none;
+  filter: drop-shadow(0 0 20px rgba(139, 92, 246, 0.5));
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -14,18 +17,40 @@
 }
 
 .App-header {
-  background-color: #282c34;
+  background: var(--secondary-bg);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   font-size: calc(10px + 2vmin);
-  color: white;
+  color: var(--text-primary);
+  position: relative;
+  overflow: hidden;
+}
+
+.App-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(16, 185, 129, 0.05) 0%, transparent 50%);
+  z-index: -1;
 }
 
 .App-link {
-  color: #61dafb;
+  color: var(--accent-blue);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.App-link:hover {
+  color: var(--accent-purple);
 }
 
 @keyframes App-logo-spin {
@@ -35,4 +60,132 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+/* Hero section styling */
+.hero-section {
+  text-align: center;
+  padding: 80px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.hero-title {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--text-primary), var(--accent-blue), var(--accent-purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+}
+
+.hero-subtitle {
+  font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+  color: var(--text-secondary);
+  margin-bottom: 3rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
+}
+
+.hero-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 4rem;
+}
+
+.install-button {
+  background: linear-gradient(135deg, var(--accent-green), var(--accent-blue));
+  color: white;
+  border: none;
+  padding: 16px 32px;
+  border-radius: 16px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 32px rgba(16, 185, 129, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.install-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(16, 185, 129, 0.4);
+}
+
+.install-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.editor-button {
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+  color: white;
+  border: none;
+  padding: 16px 32px;
+  border-radius: 16px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 32px rgba(59, 130, 246, 0.3);
+}
+
+.editor-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(59, 130, 246, 0.4);
+}
+
+/* Feature cards */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-top: 4rem;
+}
+
+.feature-card {
+  background: var(--card-bg);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+}
+
+.feature-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+  -webkit-background-clip: text;
+  /* -webkit-text-fill-color: transparent; */
+  background-clip: text;
+}
+
+.feature-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+
+.feature-description {
+  color: var(--text-secondary);
+  line-height: 1.6;
 }

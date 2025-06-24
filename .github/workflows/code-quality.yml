@@ -1,0 +1,229 @@
+name: Code Quality
+
+on:
+    push:
+        branches: [main, develop]
+    pull_request:
+        branches: [main]
+
+jobs:
+    code-quality:
+        name: Code Quality Checks
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20.x"
+                  cache: "npm"
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Run ESLint
+              run: |
+                  echo "Running ESLint..."
+                  npx eslint src/ --ext .js,.jsx,.ts,.tsx --format=json --output-file=eslint-report.json || true
+                  npx eslint src/ --ext .js,.jsx,.ts,.tsx
+
+            - name: Run Prettier Check
+              run: |
+                  echo "Checking code formatting with Prettier..."
+                  npx prettier --check "src/**/*.{js,jsx,ts,tsx,json,css,md}"
+
+            - name: Upload ESLint Report
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: eslint-report
+                  path: eslint-report.json
+
+            - name: Comment PR with ESLint Results
+              if: github.event_name == 'pull_request' && always()
+              uses: actions/github-script@v7
+              with:
+                  script: |
+                      const fs = require('fs');
+
+                      try {
+                        const eslintReport = JSON.parse(fs.readFileSync('eslint-report.json', 'utf8'));
+                        const totalErrors = eslintReport.reduce((sum, file) => sum + file.errorCount, 0);
+                        const totalWarnings = eslintReport.reduce((sum, file) => sum + file.warningCount, 0);
+                        
+                        let comment = '## 🔍 Code Quality Report\n\n';
+                        
+                        if (totalErrors === 0 && totalWarnings === 0) {
+                          comment += '✅ **Perfect!** No ESLint errors or warnings found.\n';
+                        } else {
+                          comment += `### ESLint Results\n`;
+                          comment += `- **Errors**: ${totalErrors}\n`;
+                          comment += `- **Warnings**: ${totalWarnings}\n\n`;
+                          
+                          if (totalErrors > 0) {
+                            comment += '❌ Please fix the errors before merging.\n';
+                          }
+                        }
+                        
+                        // Find existing comment
+                        const { data: comments } = await github.rest.issues.listComments({
+                          owner: context.repo.owner,
+                          repo: context.repo.repo,
+                          issue_number: context.issue.number,
+                        });
+                        
+                        const existingComment = comments.find(comment => 
+                          comment.body.includes('🔍 Code Quality Report')
+                        );
+                        
+                        if (existingComment) {
+                          await github.rest.issues.updateComment({
+                            owner: context.repo.owner,
+                            repo: context.repo.repo,
+                            comment_id: existingComment.id,
+                            body: comment
+                          });
+                        } else {
+                          await github.rest.issues.createComment({
+                            owner: context.repo.owner,
+                            repo: context.repo.repo,
+                            issue_number: context.issue.number,
+                            body: comment
+                          });
+                        }
+                      } catch (error) {
+                        console.log('Could not parse ESLint report:', error.message);
+                      }
+
+    format-check:
+        name: Auto-format Code
+        runs-on: ubuntu-latest
+        if: github.event_name == 'pull_request'
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+              with:
+                  token: ${{ secrets.TOKEN }}
+                  ref: ${{ github.head_ref }}
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20.x"
+                  cache: "npm"
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Run Prettier
+              run: |
+                  echo "Running Prettier to format code..."
+                  npx prettier --write "src/**/*.{js,jsx,ts,tsx,json,css,md}"
+                  npx prettier --write "public/**/*.{html,json}"
+                  npx prettier --write "*.{js,json,md}"
+
+            - name: Check for changes
+              id: verify-changed-files
+              run: |
+                  if [ -n "$(git status --porcelain)" ]; then
+                    echo "changed=true" >> $GITHUB_OUTPUT
+                  else
+                    echo "changed=false" >> $GITHUB_OUTPUT
+                  fi
+
+            - name: Commit formatted code
+              if: steps.verify-changed-files.outputs.changed == 'true'
+              run: |
+                  git config --local user.email "action@github.com"
+                  git config --local user.name "GitHub Action"
+                  git add .
+                  git commit -m "🎨 Auto-format code with Prettier" || exit 0
+                  git push
+
+    bundle-analysis:
+        name: Bundle Size Analysis
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20.x"
+                  cache: "npm"
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Build and analyze bundle
+              run: |
+                  echo "Building and analyzing bundle size..."
+                  npm run build
+
+                  # Install bundle analyzer
+                  npm install -g webpack-bundle-analyzer
+
+                  # Analyze bundle (if webpack stats are available)
+                  if [ -f "build/static/js/*.js" ]; then
+                    echo "📦 Bundle files:"
+                    ls -lh build/static/js/*.js
+                    
+                    echo "📊 Bundle size analysis:"
+                    du -sh build/
+                    find build/static -name "*.js" -exec du -h {} \; | sort -h
+                  fi
+
+            - name: Comment bundle size on PR
+              if: github.event_name == 'pull_request'
+              uses: actions/github-script@v7
+              with:
+                  script: |
+                      const fs = require('fs');
+                      const path = require('path');
+
+                      // Get bundle files
+                      const jsFiles = fs.readdirSync('build/static/js/')
+                        .filter(file => file.endsWith('.js'))
+                        .map(file => {
+                          const stats = fs.statSync(path.join('build/static/js/', file));
+                          return {
+                            name: file,
+                            size: (stats.size / 1024).toFixed(2) + ' KB'
+                          };
+                        });
+
+                      let comment = '## 📦 Bundle Size Report\n\n';
+                      comment += '| File | Size |\n';
+                      comment += '|------|------|\n';
+
+                      jsFiles.forEach(file => {
+                        comment += `| ${file.name} | ${file.size} |\n`;
+                      });
+
+                      const totalSize = fs.readdirSync('build/static/js/')
+                        .filter(file => file.endsWith('.js'))
+                        .reduce((total, file) => {
+                          const stats = fs.statSync(path.join('build/static/js/', file));
+                          return total + stats.size;
+                        }, 0);
+
+                      comment += `\n**Total JS Bundle Size**: ${(totalSize / 1024).toFixed(2)} KB\n`;
+
+                      if (totalSize > 500 * 1024) { // 500KB
+                        comment += '\n⚠️ **Warning**: Bundle size is getting large. Consider code splitting.\n';
+                      } else {
+                        comment += '\n✅ Bundle size looks good!\n';
+                      }
+
+                      await github.rest.issues.createComment({
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        issue_number: context.issue.number,
+                        body: comment
+                      });

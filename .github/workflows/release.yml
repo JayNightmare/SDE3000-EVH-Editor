@@ -1,0 +1,130 @@
+name: Release
+
+on:
+    push:
+        tags:
+            - "v*"
+
+jobs:
+    create-release:
+        name: Create Release
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20.x"
+                  cache: "npm"
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Run tests
+              run: npm test -- --coverage --watchAll=false
+              env:
+                  CI: true
+
+            - name: Build application
+              run: npm run build
+              env:
+                  GENERATE_SOURCEMAP: false
+
+            - name: Create build archive
+              run: |
+                  cd build
+                  tar -czf ../sde3000-evh-editor-${{ github.ref_name }}.tar.gz .
+                  cd ..
+                  zip -r sde3000-evh-editor-${{ github.ref_name }}.zip build/
+
+            - name: Generate changelog
+              id: changelog
+              run: |
+                  # Get the previous tag
+                  PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+
+                  if [ -z "$PREVIOUS_TAG" ]; then
+                    echo "changelog=Initial release of SDE-3000 EVH MIDI Editor" >> $GITHUB_OUTPUT
+                  else
+                    echo "changelog<<EOF" >> $GITHUB_OUTPUT
+                    git log --pretty=format:"- %s (%h)" $PREVIOUS_TAG..HEAD >> $GITHUB_OUTPUT
+                    echo "" >> $GITHUB_OUTPUT
+                    echo "EOF" >> $GITHUB_OUTPUT
+                  fi
+
+            - name: Create GitHub Release
+              uses: actions/create-release@v1
+              env:
+                  GITHUB_TOKEN: ${{ secrets.TOKEN }}
+              with:
+                  tag_name: ${{ github.ref_name }}
+                  release_name: SDE-3000 EVH Editor ${{ github.ref_name }}
+                  body: |
+                      ## 🎸 SDE-3000 EVH Editor ${{ github.ref_name }}
+
+                      ### What's New
+                      ${{ steps.changelog.outputs.changelog }}
+
+                      ### 📱 Installation
+                      - **Web App**: Visit the [live demo](https://yourusername.github.io/sde3000-evh-editor)
+                      - **PWA**: Install directly from your browser for offline access
+                      - **Self-hosted**: Download the build artifacts below
+
+                      ### 🎯 Features
+                      - Real-time MIDI control for SDE-3000 EVH parameters
+                      - Memory slot management (6 slots)
+                      - Progressive Web App with offline support
+                      - Modern dark theme with gradient styling
+                      - Mobile-responsive design
+
+                      ### 📋 Requirements
+                      - Boss SDE-3000 EVH digital delay pedal
+                      - MIDI interface or USB MIDI cable
+                      - Modern web browser with MIDI Web API support
+                      - Chrome, Edge, or Opera recommended
+
+                      ### 🔧 Technical Details
+                      - Built with React 18
+                      - Progressive Web App (PWA)
+                      - MIDI Web API integration
+                      - Service Worker for offline functionality
+
+                      ---
+
+                      **Full Changelog**: https://github.com/${{ github.repository }}/compare/${{ github.event.before }}...${{ github.ref_name }}
+                  draft: false
+                  prerelease: ${{ contains(github.ref_name, '-') }}
+
+            - name: Upload Release Assets
+              uses: actions/upload-release-asset@v1
+              env:
+                  GITHUB_TOKEN: ${{ secrets.TOKEN }}
+              with:
+                  upload_url: ${{ steps.create_release.outputs.upload_url }}
+                  asset_path: ./sde3000-evh-editor-${{ github.ref_name }}.tar.gz
+                  asset_name: sde3000-evh-editor-${{ github.ref_name }}.tar.gz
+                  asset_content_type: application/gzip
+
+            - name: Upload ZIP Release Asset
+              uses: actions/upload-release-asset@v1
+              env:
+                  GITHUB_TOKEN: ${{ secrets.TOKEN }}
+              with:
+                  upload_url: ${{ steps.create_release.outputs.upload_url }}
+                  asset_path: ./sde3000-evh-editor-${{ github.ref_name }}.zip
+                  asset_name: sde3000-evh-editor-${{ github.ref_name }}.zip
+                  asset_content_type: application/zip
+
+            - name: Deploy to GitHub Pages
+              run: |
+                  echo "Deploying release to GitHub Pages..."
+                  npm run deploy
+              env:
+                  GITHUB_TOKEN: ${{ secrets.TOKEN }}
