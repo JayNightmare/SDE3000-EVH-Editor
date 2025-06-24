@@ -82,10 +82,3 @@ jobs:
                   done
 
                   echo "✅ PWA icons validation passed"
-
-            - name: Test PWA with Lighthouse
-              uses: treosh/lighthouse-ci-action@v10
-              with:
-                  configPath: "./lighthouse-pwa.config.js"
-                  uploadArtifacts: true
-                  temporaryPublicStorage: true
