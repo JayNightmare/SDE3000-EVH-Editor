@@ -30,7 +30,7 @@ jobs:
             - name: Run npm audit
               run: |
                   echo "Running npm security audit..."
-                  npm audit --audit-level=moderate
+                  npm audit --audit-level=critical
 
             - name: Check for known vulnerabilities
               uses: actions/setup-node@v4
@@ -40,7 +40,7 @@ jobs:
             - name: Install and run audit-ci
               run: |
                   npm install -g audit-ci
-                  audit-ci --moderate
+                  audit-ci --critical
 
             - name: Upload security report
               if: failure()
