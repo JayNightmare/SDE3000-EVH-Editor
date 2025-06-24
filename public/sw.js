@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-globals */
-const CACHE_NAME = "sde3000-evh-editor-v1";
+const CACHE_NAME = "SDE3000-EVH-Editor-v1";
 const urlsToCache = [
     "/",
     "/static/js/bundle.js",

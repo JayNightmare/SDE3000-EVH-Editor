@@ -40,9 +40,9 @@ jobs:
             - name: Create build archive
               run: |
                   cd build
-                  tar -czf ../sde3000-evh-editor-${{ github.ref_name }}.tar.gz .
+                  tar -czf ../SDE3000-EVH-Editor-${{ github.ref_name }}.tar.gz .
                   cd ..
-                  zip -r sde3000-evh-editor-${{ github.ref_name }}.zip build/
+                  zip -r SDE3000-EVH-Editor-${{ github.ref_name }}.zip build/
 
             - name: Generate changelog
               id: changelog
@@ -73,7 +73,7 @@ jobs:
                       ${{ steps.changelog.outputs.changelog }}
 
                       ### 📱 Installation
-                      - **Web App**: Visit the [live demo](https://yourusername.github.io/sde3000-evh-editor)
+                      - **Web App**: Visit the [live demo](https://JayNightmare.github.io/SDE3000-EVH-Editor)
                       - **PWA**: Install directly from your browser for offline access
                       - **Self-hosted**: Download the build artifacts below
 
@@ -108,8 +108,8 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.TOKEN }}
               with:
                   upload_url: ${{ steps.create_release.outputs.upload_url }}
-                  asset_path: ./sde3000-evh-editor-${{ github.ref_name }}.tar.gz
-                  asset_name: sde3000-evh-editor-${{ github.ref_name }}.tar.gz
+                  asset_path: ./SDE3000-EVH-Editor-${{ github.ref_name }}.tar.gz
+                  asset_name: SDE3000-EVH-Editor-${{ github.ref_name }}.tar.gz
                   asset_content_type: application/gzip
 
             - name: Upload ZIP Release Asset
@@ -118,8 +118,8 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.TOKEN }}
               with:
                   upload_url: ${{ steps.create_release.outputs.upload_url }}
-                  asset_path: ./sde3000-evh-editor-${{ github.ref_name }}.zip
-                  asset_name: sde3000-evh-editor-${{ github.ref_name }}.zip
+                  asset_path: ./SDE3000-EVH-Editor-${{ github.ref_name }}.zip
+                  asset_name: SDE3000-EVH-Editor-${{ github.ref_name }}.zip
                   asset_content_type: application/zip
 
             - name: Deploy to GitHub Pages
