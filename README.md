@@ -4,8 +4,8 @@ A modern, web-based MIDI editor for the **Boss SDE-3000 EVH** digital delay peda
 
 <div align="center">
 
-[![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-Visit_App-blue?style=for-the-badge)](https://yourusername.github.io/sde3000-evh-editor)
-[![PWA Ready](https://img.shields.io/badge/📱_PWA-Ready-green?style=for-the-badge)](https://yourusername.github.io/sde3000-evh-editor)
+[![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-Visit_App-blue?style=for-the-badge)](https://JayNightmare.github.io/SDE3000-EVH-Editor)
+[![PWA Ready](https://img.shields.io/badge/📱_PWA-Ready-green?style=for-the-badge)](https://JayNightmare.github.io/SDE3000-EVH-Editor)
 [![MIDI Web API](https://img.shields.io/badge/🎹_MIDI-Web_API-purple?style=for-the-badge)](https://webaudio.github.io/web-midi-api/)
 
 </div>
@@ -76,7 +76,7 @@ The SDE-3000 EVH Editor bridges the gap between classic hardware and modern digi
 
 ### Option 1: Use the Live App
 
-1. Visit [**Live Demo**](https://yourusername.github.io/sde3000-evh-editor)
+1. Visit [**Live Demo**](https://JayNightmare.github.io/SDE3000-EVH-Editor)
 2. Connect your SDE-3000 EVH via MIDI
 3. Grant MIDI permissions when prompted
 4. Start controlling your pedal!
@@ -92,8 +92,8 @@ The SDE-3000 EVH Editor bridges the gap between classic hardware and modern digi
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/sde3000-evh-editor.git
-cd sde3000-evh-editor
+git clone https://github.com/JayNightmare/SDE3000-EVH-Editor.git
+cd SDE3000-EVH-Editor
 
 # Install dependencies
 npm install
@@ -214,7 +214,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 <div align="center">
 
-**[🌐 Live Demo](https://yourusername.github.io/sde3000-evh-editor)** • **[📱 Install PWA](https://yourusername.github.io/sde3000-evh-editor)** • **[🐛 Report Bug](https://github.com/yourusername/sde3000-evh-editor/issues)** • **[✨ Request Feature](https://github.com/yourusername/sde3000-evh-editor/issues)**
+**[🌐 Live Demo](https://JayNightmare.github.io/SDE3000-EVH-Editor)** • **[📱 Install PWA](https://JayNightmare.github.io/SDE3000-EVH-Editor)** • **[🐛 Report Bug](https://github.com/JayNightmare/SDE3000-EVH-Editor/issues)** • **[✨ Request Feature](https://github.com/JayNightmare/SDE3000-EVH-Editor/issues)**
 
 _Made with ❤️ for the guitar community_
 
