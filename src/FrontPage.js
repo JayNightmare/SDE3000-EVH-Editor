@@ -18,11 +18,6 @@ const FrontPage = ({ onEnterApp }) => {
             handleBeforeInstallPrompt
         );
 
-        // Check if app is already installed
-        if (window.matchMedia("(display-mode: standalone)").matches) {
-            setShowInstallButton(false);
-        }
-
         return () => {
             window.removeEventListener(
                 "beforeinstallprompt",
